@@ -1,0 +1,69 @@
+#!/bin/bash
+# This script creates  ackups of the bash history file.  on loggoff
+# whit user unit ~/.config/systemd/user/history-backup.service
+#
+# [Unit]
+# Description=Make Backup of History on Shutdown or Logoff
+#
+# [Service]
+# Type=oneshot
+# RemainAfterExit=true
+# ExecStop=/home/arpagon/bin/history-backup
+#
+# [Install]
+# WantedBy=multi-user.target
+#
+HISTORY_DIR_ARCHIVE=~/.bash_history.d
+
+BASH_HIST=~/.bash_history
+BASH_BACKUP=${HISTORY_DIR_ARCHIVE}/bash_history.$(date +"%Y-%m-%d_%H%M%S")
+
+FISH_HIST=~/.local/share/fish/fish_history
+FISH_BACKUP=${HISTORY_DIR_ARCHIVE}/fish_history.$(date +"%Y-%m-%d_%H%M%S")
+
+#
+# BASH History Backup
+#
+
+if [ -s "${BASH_HIST}" -a "${BASH_HIST}" ]; then
+  mkdir -p ${HISTORY_DIR_ARCHIVE}
+  LAST_BACKUP_BASH_FILE=$(ls -1t ${HISTORY_DIR_ARCHIVE}/bash_history* | head -1)
+  if [ -n "${LAST_BACKUP_BASH_FILE}" ]; then
+    LAST_TS_BASH_BACKUP=$(grep -E '^#[0-9]{1,12}$' ${LAST_BACKUP_BASH_FILE} | tail -n1)
+    if [ -n "${LAST_TS_BASH_BACKUP}" ]; then
+      echo "[BASH-BACKUP] Doing backup ahead of timestamp ${LAST_TS_BASH_BACKUP} on file ${BASH_BACKUP}"
+      echo ${LAST_TS_BASH_BACKUP} >> ${BASH_BACKUP}
+      awk "/${LAST_TS_BASH_BACKUP}/?c++:c" ${BASH_HIST} >> ${BASH_BACKUP}
+    else
+      echo "[BASH-BACKUP] Cant get last time stamp coping all history"
+      cat ${BASH_HIST} >> ${BASH_BACKUP}
+    fi
+  else
+    echo "[BASH-BACKUP] Cant get last backup file coping all history"
+    cat ${BASH_HIST} >> ${BASH_BACKUP}
+  fi
+fi
+
+#
+# Fish History Backup
+#
+
+if [ -s "${FISH_HIST}" -a "${FISH_HIST}" ]; then
+  mkdir -p ${HISTORY_DIR_ARCHIVE}
+  LAST_BACKUP_FISH_FILE=$(ls -1t ${HISTORY_DIR_ARCHIVE}/fish_history* | head -1)
+  if [ -n "${LAST_BACKUP_FISH_FILE}" ]; then
+    LAST_TS_FISH_BACKUP=$(grep -E '^  when: [0-9]{1,12}$' ${LAST_BACKUP_FISH_FILE} | tail -n1)
+    if [ -n "${LAST_TS_FISH_BACKUP}" ]; then
+      echo "[FISH-BACKUP] Doing backup ahead of timestamp ${LAST_TS_FISH_BACKUP} on file ${FISH_BACKUP}"
+      echo "- cmd: history-backup ;fish manual" >> ${FISH_BACKUP}
+      echo "${LAST_TS_FISH_BACKUP}" >> ${FISH_BACKUP}
+      awk "/${LAST_TS_FISH_BACKUP}/?c++:c" ${FISH_HIST} >> ${FISH_BACKUP}
+    else
+      echo "[FISH-BACKUP] Cant get last time stamp coping all history on ${LAST_BACKUP_FISH_FILE}"
+      cat ${FISH_HIST} >> ${FISH_BACKUP}
+    fi
+  else
+    echo "[FISH-BACKUP] Cant get last backup file coping all history"
+    cat ${FISH_HIST} >> ${FISH_BACKUP}
+  fi
+fi
