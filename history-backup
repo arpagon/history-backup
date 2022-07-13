@@ -1,25 +1,38 @@
 #!/bin/bash
 # This script creates  ackups of the bash history file.  on loggoff
 # whit user unit ~/.config/systemd/user/history-backup.service
-#
 # [Unit]
 # Description=Make Backup of History on Shutdown or Logoff
-#
+# DefaultDependencies=no
+# Before=shutdown.target reboot.target halt.target
+
 # [Service]
 # Type=oneshot
-# RemainAfterExit=true
-# ExecStop=/home/arpagon/bin/history-backup
-#
+# ExecStart=/home/arpagon/Workspace/arpagon/history-backup/history-backup
+
 # [Install]
-# WantedBy=multi-user.target
+# WantedBy=halt.target reboot.target shutdown.target
 #
-HISTORY_DIR_ARCHIVE=~/.bash_history.d
+####
+#
+# And in bashrc `export HISTTIMEFORMAT="%Y-%m-%d %T "`
+#
+####
+
+if [ -d "/keybase/private/$USER/bash_history.d" ]
+then
+    echo "Backup Directory is /keybase/private/$USER/bash_history.d" 
+    HISTORY_DIR_ARCHIVE=/keybase/private/$USER/bash_history.d
+else
+    echo "Backup Directory is ~/.bash_history.d"
+    HISTORY_DIR_ARCHIVE=~/.bash_history.d
+fi
 
 BASH_HIST=~/.bash_history
-BASH_BACKUP=${HISTORY_DIR_ARCHIVE}/bash_history.$(date +"%Y-%m-%d_%H%M%S")
+BASH_BACKUP=${HISTORY_DIR_ARCHIVE}/bash_history.$(hostname -f).$(date +"%Y-%m-%d_%H%M%S")
 
 FISH_HIST=~/.local/share/fish/fish_history
-FISH_BACKUP=${HISTORY_DIR_ARCHIVE}/fish_history.$(date +"%Y-%m-%d_%H%M%S")
+FISH_BACKUP=${HISTORY_DIR_ARCHIVE}/fish_history.$(hostname -f).$(date +"%Y-%m-%d_%H%M%S")
 
 #
 # BASH History Backup
