@@ -19,20 +19,21 @@
 #
 ####
 
-if [ -d "/keybase/private/$USER/bash_history.d" ]
+if [ -d "/keybase/team/arpagonco/bash_history.d/" ]
 then
-    echo "Backup Directory is /keybase/private/$USER/bash_history.d" 
-    HISTORY_DIR_ARCHIVE=/keybase/private/$USER/bash_history.d
+    echo "Backup Directory is /keybase/team/arpagonco/bash_history.d/" 
+    HISTORY_DIR_ARCHIVE=/keybase/team/arpagonco/bash_history.d/
 else
     echo "Backup Directory is ~/.bash_history.d"
     HISTORY_DIR_ARCHIVE=~/.bash_history.d
 fi
 
+HOSTNAME=$(hostname -f)
 BASH_HIST=~/.bash_history
-BASH_BACKUP=${HISTORY_DIR_ARCHIVE}/bash_history.$(hostname -f).$(date +"%Y-%m-%d_%H%M%S")
+BASH_BACKUP=${HISTORY_DIR_ARCHIVE}/bash_history.$HOSTNAME.$(date +"%Y-%m-%d_%H%M%S")
 
 FISH_HIST=~/.local/share/fish/fish_history
-FISH_BACKUP=${HISTORY_DIR_ARCHIVE}/fish_history.$(hostname -f).$(date +"%Y-%m-%d_%H%M%S")
+FISH_BACKUP=${HISTORY_DIR_ARCHIVE}/fish_history.$HOSTNAME.$(date +"%Y-%m-%d_%H%M%S")
 
 #
 # BASH History Backup
@@ -40,7 +41,7 @@ FISH_BACKUP=${HISTORY_DIR_ARCHIVE}/fish_history.$(hostname -f).$(date +"%Y-%m-%d
 
 if [ -s "${BASH_HIST}" -a "${BASH_HIST}" ]; then
   mkdir -p ${HISTORY_DIR_ARCHIVE}
-  LAST_BACKUP_BASH_FILE=$(ls -1t ${HISTORY_DIR_ARCHIVE}/bash_history* | head -1)
+  LAST_BACKUP_BASH_FILE=$(ls -1t ${HISTORY_DIR_ARCHIVE}/bash_history.$HOSTNAME.* | head -1)
   if [ -n "${LAST_BACKUP_BASH_FILE}" ]; then
     LAST_TS_BASH_BACKUP=$(grep -E '^#[0-9]{1,12}$' ${LAST_BACKUP_BASH_FILE} | tail -n1)
     if [ -n "${LAST_TS_BASH_BACKUP}" ]; then
@@ -63,7 +64,7 @@ fi
 
 if [ -s "${FISH_HIST}" -a "${FISH_HIST}" ]; then
   mkdir -p ${HISTORY_DIR_ARCHIVE}
-  LAST_BACKUP_FISH_FILE=$(ls -1t ${HISTORY_DIR_ARCHIVE}/fish_history* | head -1)
+  LAST_BACKUP_FISH_FILE=$(ls -1t ${HISTORY_DIR_ARCHIVE}/fish_history.$HOSTNAME.* | head -1)
   if [ -n "${LAST_BACKUP_FISH_FILE}" ]; then
     LAST_TS_FISH_BACKUP=$(grep -E '^  when: [0-9]{1,12}$' ${LAST_BACKUP_FISH_FILE} | tail -n1)
     if [ -n "${LAST_TS_FISH_BACKUP}" ]; then
