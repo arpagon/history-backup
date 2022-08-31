@@ -1,0 +1,11 @@
+[Unit]
+Description=Make Backup of History on Shutdown or Logoff
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/arpagon/Workspace/arpagon/history-backup/history-backup
+
+[Install]
+WantedBy=halt.target reboot.target shutdown.target
